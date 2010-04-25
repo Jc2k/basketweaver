@@ -68,16 +68,13 @@ class ZipArchive:
 def _extractNameVersion(filename, tempdir):
     print 'Parsing:', filename
 
-    archive = None
-    
     if filename.endswith('.gz') or filename.endswith('.tgz') or filename.endswith('.bz2'):
         archive = TarArchive(filename)
-
     elif filename.endswith('.egg') or filename.endswith('.zip'):
         archive = ZipArchive(filename)
-  
-    if archive is None:
+    else:
         return
+
     try:
         for name in archive.names():
             if len(name.split('/'))==2  and name.endswith('PKG-INFO'):
@@ -85,21 +82,19 @@ def _extractNameVersion(filename, tempdir):
                 project, version = None, None
 
                 lines = archive.lines(name)
-
                 for line in lines:
                     key, value = line.split(':', 1)
 
                     if key == 'Name':
                         print filename, value
                         project = value.strip()
-
                     elif key == 'Version':
                         version = value.strip()
 
                     if project is not None and version is not None:
                         return project, version
-                contiue;
-                
+                continue;
+
         # no PKG-INFO found, do it the hard way.
         archive.extractall(tempdir)
         dirs = os.listdir(tempdir)
@@ -113,14 +108,14 @@ def _extractNameVersion(filename, tempdir):
                                  shell=True,
                                  )
         output = popen.communicate()[0]
-        archive.close()
         return output.splitlines()[:2]
     except:
-        archive.close()
         import traceback
         print traceback.format_exc()
-    return
-        
+    finally:
+        archive.close()
+
+
 
 
 def main(argv=None):
@@ -135,9 +130,10 @@ def main(argv=None):
             tempdir = tempfile.mkdtemp()
             project, revision = _extractNameVersion(arg, tempdir)
             projects.setdefault(project, []).append((revision, arg))
-            shutil.rmtree(tempdir)
         except:
-            pass
+            print "Couldn't find version info"
+        finally:
+            shutil.rmtree(tempdir)
             
 
     items = projects.items()
