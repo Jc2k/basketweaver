@@ -109,9 +109,6 @@ def _extractNameVersion(filename, tempdir):
                                  )
         output = popen.communicate()[0]
         return output.splitlines()[:2]
-    except:
-        import traceback
-        print traceback.format_exc()
     finally:
         archive.close()
 
@@ -127,11 +124,12 @@ def main(argv=None):
         if arg.startswith('*'):
             continue
         try:
-            tempdir = tempfile.mkdtemp()
-            project, revision = _extractNameVersion(arg, tempdir)
-            projects.setdefault(project, []).append((revision, arg))
-        except:
-            print "Couldn't find version info"
+            try:
+                tempdir = tempfile.mkdtemp()
+                project, revision = _extractNameVersion(arg, tempdir)
+                projects.setdefault(project, []).append((revision, arg))
+            except:
+                print "Couldn't find version info"
         finally:
             shutil.rmtree(tempdir)
             
