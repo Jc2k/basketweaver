@@ -68,6 +68,20 @@ class ZipArchive:
 def _extractNameVersion(filename, tempdir):
     print 'Parsing:', filename
 
+    def _write_cache_file(filename, project, version):
+        """ Write out a version cache file """
+        cache_file = open(filename + '.version_cache', 'w')
+        cache_file.write(project + '\n')
+        cache_file.write(version)
+        cache_file.close()
+
+    def _read_cache_file(filename):
+        """ Read out the cached version number """
+        cache_file = open(filename + '.version_cache', 'r')
+        project, version = cache_file.read().split('\n')
+        return project, version
+        
+
     if filename.endswith('.gz') or filename.endswith('.tgz') or filename.endswith('.bz2'):
         archive = TarArchive(filename)
     elif filename.endswith('.egg') or filename.endswith('.zip'):
