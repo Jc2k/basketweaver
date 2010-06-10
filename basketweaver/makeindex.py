@@ -149,6 +149,9 @@ def main(argv=None):
     for arg in argv:
         if arg.startswith('*'):
             continue
+        # ignore version cache files
+        if arg.endswith('.version_cache'):
+            continue
         try:
             try:
                 tempdir = tempfile.mkdtemp()
