@@ -89,6 +89,17 @@ def _extractNameVersion(filename, tempdir):
     else:
         return
 
+    # try and get the cached version
+    # if it exists, return those
+    # if we get an exception, carry on and do some analysis
+    try:
+        project, version =_read_cache_file(filename)
+        print "Using cache for: " + project + " " + version
+        return project, version
+    except:
+        pass
+
+
     try:
         for name in archive.names():
             if len(name.split('/'))==2  and name.endswith('PKG-INFO'):
@@ -106,6 +117,7 @@ def _extractNameVersion(filename, tempdir):
                         version = value.strip()
 
                     if project is not None and version is not None:
+                        _write_cache_file(filename, project, version)
                         return project, version
                 continue;
 
