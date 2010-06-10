@@ -139,11 +139,21 @@ def _extractNameVersion(filename, tempdir):
         archive.close()
 
 
-
+def _clean(filename):
+    """ Clean any cache files """
+    if filename.endswith('.version_cache'):
+        print "Removing: " + filename
+        os.remove(filename)
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
+
+    if '--clean' in argv:
+        print 'Clean activated'
+        for arg in argv:
+            _clean(arg)
+        return
 
     projects = {}
     for arg in argv:
