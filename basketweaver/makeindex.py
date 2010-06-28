@@ -155,6 +155,8 @@ def main(argv=None):
             _clean(arg)
         return
 
+    name_map = {}
+
     projects = {}
     for arg in argv:
         if arg.startswith('*'):
@@ -166,6 +168,16 @@ def main(argv=None):
             try:
                 tempdir = tempfile.mkdtemp()
                 project, revision = _extractNameVersion(arg, tempdir)
+
+                # We might have a name collision, so build an hash of
+                #  lowercase to first encountered version
+                #  e.g. markdown: Markdown; products.cachesetup: Products.CacheSetup
+                # The goal is that we only have *1* version of the name in the final index
+                if project.lower() in name_map:
+                    project = name_map[project.lower()]
+                else:
+                    name_map[project.lower()] = project
+
                 projects.setdefault(project, []).append((revision, arg))
             except:
                 print "Couldn't find version info"
