@@ -169,16 +169,13 @@ def main(argv=None):
                 tempdir = tempfile.mkdtemp()
                 project, revision = _extractNameVersion(arg, tempdir)
 
-                # We might have a name collision, so build an hash of
-                #  lowercase to first encountered version
-                #  e.g. markdown: Markdown; products.cachesetup: Products.CacheSetup
-                # The goal is that we only have *1* version of the name in the final index
-                if project.lower() in name_map:
-                    project = name_map[project.lower()]
-                else:
-                    name_map[project.lower()] = project
+                # Make a map of all the projects, but and group different flavours
+                # of the same name
+                foo = name_map.setdefault(project.lower(), [])
+                if not project in foo:
+                    foo.append(project)
 
-                projects.setdefault(project, []).append((revision, arg))
+                projects.setdefault(project.lower(), []).append((revision, arg))
             except:
                 print "Couldn't find version info"
         finally:
