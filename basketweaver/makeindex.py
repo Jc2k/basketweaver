@@ -180,9 +180,13 @@ def main(argv=None):
                 print "Couldn't find version info"
         finally:
             shutil.rmtree(tempdir)
-            
 
-    items = projects.items()
+    inverse_name_map = {}
+    for k, v in name_map.iteritems():
+        for variant in v:
+            inverse_name_map[variant] = projects[k]
+
+    items = inverse_name_map.items()
     items.sort()
     topname = 'index'
 
