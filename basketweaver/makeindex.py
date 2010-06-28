@@ -155,6 +155,8 @@ def main(argv=None):
             _clean(arg)
         return
 
+    name_map = {}
+
     projects = {}
     for arg in argv:
         if arg.startswith('*'):
@@ -166,14 +168,25 @@ def main(argv=None):
             try:
                 tempdir = tempfile.mkdtemp()
                 project, revision = _extractNameVersion(arg, tempdir)
-                projects.setdefault(project, []).append((revision, arg))
+
+                # Make a map of all the projects, but and group different flavours
+                # of the same name
+                foo = name_map.setdefault(project.lower(), [])
+                if not project in foo:
+                    foo.append(project)
+
+                projects.setdefault(project.lower(), []).append((revision, arg))
             except:
                 print "Couldn't find version info"
         finally:
             shutil.rmtree(tempdir)
-            
 
-    items = projects.items()
+    inverse_name_map = {}
+    for k, v in name_map.iteritems():
+        for variant in v:
+            inverse_name_map[variant] = projects[k]
+
+    items = inverse_name_map.items()
     items.sort()
     topname = 'index'
 
