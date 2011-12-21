@@ -108,6 +108,8 @@ def _extractNameVersion(filename, tempdir):
 
                 lines = archive.lines(name)
                 for line in lines:
+                    if not ":" in line:
+                        continue
                     key, value = line.split(':', 1)
 
                     if key == 'Name':
